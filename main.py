@@ -4,13 +4,17 @@ def menu():
     :return: True if the user chose to play, False otherwise."""
     while True:
         print("MENU \n1. New Game \n2. Exit")
-        choice = int(input())
-        if choice == 1:
-            return True
-        elif choice == 2:
-            return False
-        else:
-            print("Invalid choice, try again.")
+        try:
+            choice = int(input())
+            if choice == 1:
+                return True
+            elif choice == 2:
+                return False
+            else:
+                print("Invalid choice, please try again.")
+                continue
+        except ValueError:
+            print("Invalid input, please pick 1 or 2.")
             continue
 
 
