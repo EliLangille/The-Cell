@@ -10,10 +10,7 @@ class Room:
     def get_name(self):
         return self.name
 
-    def get_base_description(self):
-        return self.base_description
-
-    def get_dynamic_description(self):
+    def get_description(self):
         # Add room item descriptions
         description = "You see a "
         if len(self.items) > 2:
@@ -26,10 +23,22 @@ class Room:
         description += " here."
 
         # Add room NPC descriptions
-        # ...
+        if self.npcs:
+            description += "\n\nA "
+            if len(self.npcs) > 2:
+                description += ", ".join([npc.get_name() for npc in self.npcs[:-1]])
+                description += ", and " + self.npcs[-1].get_name()
+                description += " are"
+            elif len(self.npcs) == 2:
+                description += self.npcs[0].get_name() + " and " + self.npcs[1].get_name()
+                description += " are"
+            else:
+                description += self.npcs[0].get_name()
+                description += " is"
+            description += " here."
 
         # Add room doors (linked rooms)
-        description += "There "
+        description += "\n\nThere "
         directions = [direction for direction, room in self.linked_rooms.items() if room]
         if len(directions) == 0:
             description += "are no exits."
