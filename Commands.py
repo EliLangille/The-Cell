@@ -1,3 +1,7 @@
+from Combat import Combat
+from Key import Key
+
+
 class Commands:
     def __init__(self, player):
         self.player = player
@@ -11,7 +15,7 @@ class Commands:
         action = parts[0]
         match action:
             case "help":
-                self.show_help()
+                self.help()
             case "look":
                 if len(parts) == 1 or command == "look at room":
                     self.look()
@@ -31,13 +35,15 @@ class Commands:
                     self.move(parts[1])
             case "get" | "grab" | "take":
                 self.take(parts[1])
+            case "unlock":
+                self.unlock(parts[1])
             case "talk":
                 self.talk(parts[:-1])
             case _:
                 print("Invalid command.")
 
     @staticmethod
-    def show_help():
+    def help():
         print("COMMANDS:")
         print("help - Show available commands")
         print("look - Look around the room")
@@ -46,6 +52,7 @@ class Commands:
         print("inventory - Show player inventory")
         print("go/move [north/east/south/west] - Move in a specified direction")
         print("get/take/grab [item] - Pick up an item in the room")
+        print("unlock [direction] - Unlock a door in a specified direction")
         print("talk [npc] - Talk to an NPC")
 
     def look(self):
@@ -84,18 +91,48 @@ class Commands:
         if next_room:
             self.player.move_to_room(next_room)
             self.look()
+
+            # Start combat is hostile NPC is in the room
+            npc = next((npc for npc in next_room.get_npcs() if npc.is_hostile()), None)
+            if npc:
+                print(f"You have encountered the {npc.get_name()}!")
+                combat = Combat(self.player, npc)
+                combat.start_combat()
         else:
             print("You cannot move in that direction.")
 
     def take(self, item_name):
         room = self.player.get_current_room()
-        item = next((item for item in room.get_items() if item.get_name() == item_name), None)
+        item = next((item for item in room.get_items() if item.get_name().lower() == item_name), None)
         if item:
             self.player.add_item(item)
             room.remove_item(item)
-            print(f"You picked up {item_name}.")
+            print(f"You picked up the {item_name}.")
         else:
             print("That item is not here.")
+
+    def unlock(self, direction):
+        direction = direction.upper()
+        if direction not in ['N', 'E', 'S', 'W']:
+            print("Invalid direction.")
+            return
+
+        room = self.player.get_current_room()
+        lock = room.get_lock(direction)
+
+        if lock:
+            # Get all Key objects in inventory
+            keys = [item for item in self.player.get_inventory() if isinstance(item, Key)]
+
+            # If keys in inventory, try them all on the door
+            if keys:
+                for key in keys:
+                    if key.get_lock() == lock:
+                        room.set_lock(direction, None)
+                        print(f"Unlocked the door to the {direction}.")
+                        return
+
+            print("You do not have the key to unlock this door.")
 
     def talk(self, npc_name):
         room = self.player.get_current_room()
