@@ -31,6 +31,8 @@ class Commands:
                     self.move(parts[1])
             case "get" | "grab" | "take":
                 self.take(parts[1])
+            case "unlock":
+                self.unlock(parts[1])
             case "talk":
                 self.talk(parts[:-1])
             case _:
@@ -46,6 +48,7 @@ class Commands:
         print("inventory - Show player inventory")
         print("go/move [north/east/south/west] - Move in a specified direction")
         print("get/take/grab [item] - Pick up an item in the room")
+        print("unlock [direction] - Unlock a door in a specified direction")
         print("talk [npc] - Talk to an NPC")
 
     def look(self):
@@ -96,6 +99,29 @@ class Commands:
             print(f"You picked up {item_name}.")
         else:
             print("That item is not here.")
+
+    def unlock(self, direction):
+        direction = direction.upper()
+        if direction not in ['N', 'E', 'S', 'W']:
+            print("Invalid direction.")
+            return
+
+        room = self.player.get_current_room()
+        lock = room.get_lock(direction)
+
+        if lock:
+            # Get all Key objects in inventory
+            keys = [item for item in self.player.get_inventory() if isinstance(item, Key)]
+
+            # If keys in inventory, try them all on the door
+            if keys:
+                for key in keys:
+                    if key.get_lock() == lock:
+                        room.set_lock(direction, None)
+                        print(f"Unlocked the door to the {direction}.")
+                        return
+
+            print("You do not have the key to unlock this door.")
 
     def talk(self, npc_name):
         room = self.player.get_current_room()
