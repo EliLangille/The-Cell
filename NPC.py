@@ -46,8 +46,8 @@ class NPC(Character):
                     print(next_dialogue["response"])
 
                 # Apply consequences
-                consequence = current_dialogue["options"][choice].get("consequence")
-                if consequence:
+                consequences = current_dialogue["options"][choice].get("consequences")
+                for consequence in consequences:
                     self.apply_consequence(consequence)
 
                 # Move to next dialogue (None if not present, will break loop)
@@ -60,49 +60,11 @@ class NPC(Character):
         if consequence["type"] == "reveal_item":
             item = consequence.get("item")
             if item:
-                print(f"An item is revealed in the room: {item.get_name()}")
                 self.get_current_room().add_item(item)
-        elif consequence["type"] == "become_hostile":
-            self.set_hostile(True)
-        # Will be expanded further as story is created
-
-    """Sample dialogue tree:
-        dialogue_tree = {
-            "response": "hello",
-            "options": [
-                {
-                    "text": "where am i",
-                    "next_dialogue": {
-                        "response": "in this jail cell",
-                        "options": [
-                            {
-                                "text": "how do we get out?",
-                                "consequence": {
-                                    "type": "reveal_item",
-                                    "item": some_item  # Replace with actual item object
-                                },
-                                "next_dialogue": {
-                                    "response": "we need the key, the jailer has it",
-                                    "options": []
-                                }
-                            },
-                            {
-                                "text": "how did i get here?",
-                                "next_dialogue": {
-                                    "response": "nobody knows how they get here",
-                                    "options": [
-                                        {
-                                            "text": "how long have you been here?",
-                                            "next_dialogue": {
-                                                "response": "too long",
-                                                "options": []
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        }"""
+                print(f"You now see a {item.get_name()} in the {self.get_current_room().get_name()}.")
+                return
+            print("You do not see anything new.")
+        elif consequence["type"] == "tree_resolved":
+            self.dialogue_tree = consequence.get("new_dialogue")
+        else:
+            print("Invalid consequence type.")

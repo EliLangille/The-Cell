@@ -1,11 +1,11 @@
 import random
 
 
-class CombatSystem:
+class Combat:
     def __init__(self, player, npc):
         self.player = player
         self.npc = npc
-        self.turn = "player" if player.get_current_room() == npc.get_current_room() else "npc"
+        self.turn = "player"
 
     def start_combat(self):
         print(f"Combat initiated between {self.player.get_name()} and {self.npc.get_name()}!")
@@ -34,16 +34,25 @@ class CombatSystem:
         self.attack(self.npc, self.player)
 
     def attack(self, attacker, defender):
-        weapon = input(f"Choose a weapon from inventory or type 'bare hands': ")
-        if weapon == "bare hands":
-            damage = 10  # Example damage value for bare hands
+        # if inventory empty, attack with fists
+        if not attacker.get_inventory():
+            weapon = "fists"
+            damage = 8
         else:
-            item = next((item for item in attacker.get_inventory() if item.get_name() == weapon), None)
-            if item:
-                damage = item.get_damage()
+            # if attacker is of npc instance, pick item with the highest damage
+            if attacker == self.npc:
+                weapon = max(attacker.get_inventory(), key=lambda item: item.get_damage()).get_name()
+                damage = weapon.get_damage()
             else:
-                print("Invalid weapon. Turn forfeited.")
-                return
+                prompt = f"Choose a weapon from inventory: {', '.join([item.get_name() for item in attacker.get_inventory()])}"
+                weapon = input(prompt).title()
+
+                item = next((item for item in attacker.get_inventory() if item.get_name() == weapon), None)
+                if item:
+                    damage = item.get_damage()
+                else:
+                    print("You fail to find this weapon and your foe attacks instead.")
+                    return
 
         defender.health -= damage
         print(f"{attacker.get_name()} attacks {defender.get_name()} with {weapon} for {damage} damage!")
@@ -60,8 +69,7 @@ class CombatSystem:
             return
 
         if self.player.get_health() <= 0:
-            print(f"{self.player.get_name()} has been defeated! Game Over.")
-            exit()
+            print(f"{self.player.get_name()} has been defeated!")
         elif self.npc.get_health() <= 0:
             print(f"{self.npc.get_name()} has been defeated!")
             self.drop_inventory(self.npc)

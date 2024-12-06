@@ -75,3 +75,10 @@ class Room:
     def remove_item(self, item):
         if item in self.items:
             self.items.remove(item)
+
+    def add_npc(self, npc):
+        self.npcs.append(npc)
+
+    def remove_npc(self, npc):
+        if npc in self.npcs:
+            self.npcs.remove(npc)

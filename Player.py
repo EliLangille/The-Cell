@@ -2,8 +2,8 @@ from Character import Character
 
 
 class Player(Character):
-    def __init__(self, name, description, health=100):
-        super().__init__(name, description, health)
+    def __init__(self, name, description, health=100, inventory=None, current_room=None):
+        super().__init__(name, description, health, inventory, current_room)
 
     def show_health(self):
         print(f"HEALTH: {self.health}")
