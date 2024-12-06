@@ -6,5 +6,5 @@ class Key(Item):
         super().__init__(name, description, damage=1)
         self.lock_id = lock_id
 
-    def get_lock_id(self):
+    def get_lock(self):
         return self.lock_id
