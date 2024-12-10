@@ -11,20 +11,24 @@ class Room:
         return self.name
 
     def get_description(self):
+        # Base room description
+        description = self.base_description
+
         # Add room item descriptions
-        description = "You see a "
-        if len(self.items) > 2:
-            description += ", ".join([item.get_name() for item in self.items[:-1]])
-            description += ", and a " + self.items[-1].get_name()
-        elif len(self.items) == 2:
-            description += self.items[0].get_name() + " and a " + self.items[1].get_name()
-        else:
-            description += self.items[0].get_name()
-        description += " here."
+        if self.items:
+            description += "\nYou see a "
+            if len(self.items) > 2:
+                description += ", ".join([item.get_name() for item in self.items[:-1]])
+                description += ", and a " + self.items[-1].get_name()
+            elif len(self.items) == 2:
+                description += self.items[0].get_name() + " and a " + self.items[1].get_name()
+            else:
+                description += self.items[0].get_name()
+            description += " here."
 
         # Add room NPC descriptions
         if self.npcs:
-            description += "\n\nA "
+            description += "\nA "
             if len(self.npcs) > 2:
                 description += ", ".join([npc.get_name() for npc in self.npcs[:-1]])
                 description += ", and " + self.npcs[-1].get_name()
@@ -38,14 +42,15 @@ class Room:
             description += " here."
 
         # Add room doors (linked rooms)
-        description += "\n\nThere "
-        directions = [direction for direction, room in self.linked_rooms.items() if room]
+        direction_names = {'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west'}
+        directions = [direction_names[direction] for direction, room in self.linked_rooms.items() if room]
+        description += "\nThere "
         if len(directions) == 0:
             description += "are no exits."
         elif len(directions) == 1:
-            description += f"is an exit to the {directions[0]}."
+            description += f"is a door to the {directions[0]}."
         elif len(directions) >= 2:
-            description += f"are exits to the {', '.join(directions[:-1])}, and {directions[-1]}."
+            description += f"are doors to the {', '.join(directions[:-1])}, and {directions[-1]}."
 
         return description
 
