@@ -21,6 +21,9 @@ class Character:
     def show_description(self):
         print(self.description)
 
+    def show_health(self):
+        print(f"{self.name.upper()} HEALTH: {self.health}")
+
     def add_item(self, item):
         self.inventory.append(item)
 

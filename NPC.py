@@ -2,13 +2,10 @@ from Character import Character
 
 
 class NPC(Character):
-    def __init__(self, name, description, health=100, hostile=False, dialogue_tree=None):
-        super().__init__(name, description, health)
+    def __init__(self, name, description, health=100, hostile=False, inventory=None, current_room=None, dialogue_tree=None):
+        super().__init__(name, description, health, inventory, current_room)
         self.hostile = hostile
         self.dialogue_tree = dialogue_tree if dialogue_tree else {}
-
-    def get_goal(self):
-        return self.goal
 
     def is_hostile(self):
         return self.hostile
@@ -46,7 +43,7 @@ class NPC(Character):
                     print(next_dialogue["response"])
 
                 # Apply consequences
-                consequences = current_dialogue["options"][choice].get("consequences")
+                consequences = current_dialogue["options"][choice].get("consequences", [])
                 for consequence in consequences:
                     self.apply_consequence(consequence)
 

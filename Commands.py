@@ -38,7 +38,7 @@ class Commands:
             case "unlock":
                 self.unlock(parts[1])
             case "talk":
-                self.talk(parts[:-1])
+                self.talk(parts[1])
             case _:
                 print("Invalid command.")
 
@@ -67,14 +67,14 @@ class Commands:
             npc.show_description()
             return
 
-        item = next((item for item in room.get_items() if item.get_name() == item_or_npc_name), None)
+        item = next((item for item in room.get_items() if item.get_name().lower() == item_or_npc_name), None)
         if item:
-            item.show_description()
+            print(item.get_description())
             return
 
-        item = next((item for item in self.player.get_inventory() if item.get_name() == item_or_npc_name), None)
+        item = next((item for item in self.player.get_inventory() if item.get_name().lower() == item_or_npc_name), None)
         if item:
-            item.show_description()
+            print(item.get_description())
             return
 
         print("This character or object is not here.")
@@ -86,9 +86,19 @@ class Commands:
         self.player.show_health()
 
     def move(self, direction):
+        direction = direction.upper()
+        if direction in ['NORTH', 'EAST', 'SOUTH', 'WEST']:
+            direction = direction[0]
+        if direction not in ['N', 'E', 'S', 'W']:
+            print("Invalid direction.")
+            return
+
         room = self.player.get_current_room()
         next_room = room.get_linked_room(direction)
         if next_room:
+            if room.get_lock(direction):
+                print("The door is locked.")
+                return
             self.player.move_to_room(next_room)
             self.look()
 
@@ -99,7 +109,7 @@ class Commands:
                 combat = Combat(self.player, npc)
                 combat.start_combat()
         else:
-            print("You cannot move in that direction.")
+            print("There is nothing in that direction.")
 
     def take(self, item_name):
         room = self.player.get_current_room()
@@ -113,6 +123,8 @@ class Commands:
 
     def unlock(self, direction):
         direction = direction.upper()
+        if direction in ['NORTH', 'EAST', 'SOUTH', 'WEST']:
+            direction = direction[0]
         if direction not in ['N', 'E', 'S', 'W']:
             print("Invalid direction.")
             return
@@ -126,10 +138,11 @@ class Commands:
 
             # If keys in inventory, try them all on the door
             if keys:
+                direction_names = {'N': 'north', 'E': 'east', 'S': 'south', 'W': 'west'}
                 for key in keys:
                     if key.get_lock() == lock:
                         room.set_lock(direction, None)
-                        print(f"Unlocked the door to the {direction}.")
+                        print(f"Unlocked the door to the {direction_names[direction]}.")
                         return
 
             print("You do not have the key to unlock this door.")
